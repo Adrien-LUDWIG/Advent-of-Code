@@ -1,7 +1,7 @@
 import sys
 
 
-def first(input):
+def get_sorted_calories(input):
     # Create a list of each elve's food total calories
     elves_calories = [0]
 
@@ -13,12 +13,7 @@ def first(input):
             # Add the calories to the current elve
             elves_calories[-1] += int(calories)
 
-    # Return the biggest elve's total calories
-    return sorted(calories)[-1]
-
-
-def second(input):
-    pass
+    return sorted(elves_calories)
 
 
 if __name__ == "__main__":
@@ -30,5 +25,13 @@ if __name__ == "__main__":
     with open(sys.argv[1]) as f:
         input = [line.strip() for line in f.readlines()]
 
-    print(first(input))
-    print(second(input))
+    calories = get_sorted_calories(input)
+
+    # Get the biggest elve's total calories
+    part1 = calories[-1]
+
+    # Get the sum of the 3 biggest elves' total calories
+    part2 = sum(calories[-3:])
+
+    print(part1)
+    print(part2)
