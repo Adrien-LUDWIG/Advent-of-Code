@@ -1,10 +1,11 @@
 import sys
 
 
-def find_first_marker(input):
-    for i in range(len(input) - 4):
-        if len(set(input[i : i + 4])) == 4:
-            return i + 4
+# A marker is a slice of unique characters in a string
+def find_first_marker(input, length):
+    for i in range(len(input) - length):
+        if len(set(input[i : i + length])) == length:
+            return i + length
 
     print("No marker found")
     sys.exit(1)
@@ -26,7 +27,8 @@ if __name__ == "__main__":
     input = input[0]
 
     # Find the first marker (Part 1)
-    first_marker = find_first_marker(input)
+    start_of_packet = find_first_marker(input, 4)
+    start_of_message = find_first_marker(input, 14)
 
-    print(first_marker)
-    print("TODO: Part 2")
+    print(start_of_packet)
+    print(start_of_message)
