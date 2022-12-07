@@ -2,22 +2,17 @@ import sys
 
 LS_LINE = ["$", "ls"]
 LITTLE_DIR_THRESHOLD = 100000
-
-# We take into account the directory size only if it is under the given threshold
-def check_directory_size(directory_size):
-    if directory_size <= LITTLE_DIR_THRESHOLD:
-        return directory_size
-    else:
-        return 0
+TOTAL_DISK_SPACE = 70000000
+NEEDED_FREE_SPACE = 30000000
 
 
 # Recursive function that visits all the subdirectories and returns the total size of the current directory
-def depth_first_search(input, index):
+def depth_first_search(input, index, directories_sizes):
     directory_size = 0
-    little_directories_total_size = 0
 
     if index >= len(input):
-        return directory_size, index, little_directories_total_size
+        directories_sizes.append(directory_size)
+        return index
 
     tokens = input[index]
 
@@ -42,7 +37,8 @@ def depth_first_search(input, index):
         index += 1
 
         if index >= len(input):
-            return directory_size, index, check_directory_size(directory_size)
+            directories_sizes.append(directory_size)
+            return index
 
         tokens = input[index]
 
@@ -53,16 +49,13 @@ def depth_first_search(input, index):
 
     # Loop on the subdirectories, recursively call depth_first_search and sum the subdirectories size
     while index < len(input) and tokens[1] == "cd" and tokens[2] != "..":
-        subdirectory_size, index, little_subdirectories_total_size = depth_first_search(
-            input, index + 1
-        )
+        index = depth_first_search(input, index + 1, directories_sizes)
 
-        directory_size += subdirectory_size
-        little_directories_total_size += little_subdirectories_total_size
+        directory_size += directories_sizes[-1]
 
         if index >= len(input):
-            little_directories_total_size += check_directory_size(directory_size)
-            return directory_size, index, little_directories_total_size
+            directories_sizes.append(directory_size)
+            return index
 
         tokens = input[index]
 
@@ -71,8 +64,8 @@ def depth_first_search(input, index):
         print(tokens)
         sys.exit(1)
 
-    little_directories_total_size += check_directory_size(directory_size)
-    return directory_size, index + 1, little_directories_total_size
+    directories_sizes.append(directory_size)
+    return index + 1
 
 
 if __name__ == "__main__":
@@ -92,7 +85,33 @@ if __name__ == "__main__":
         print(first_line)
         sys.exit(1)
 
-    total_size, _, little_directories_total_size = depth_first_search(input, 1)
+    directories_sizes = []
+    depth_first_search(input, 1, directories_sizes)
+
+    # Part 1
+    little_directories_total_size = 0
+
+    # Part 2
+    # The biggest directory is the last one we pushed in the list
+    biggest_directory_size = directories_sizes[-1]
+    # Compute the size of the littlest directory to delete to free the needed space
+    size_to_free = NEEDED_FREE_SPACE - (TOTAL_DISK_SPACE - biggest_directory_size)
+    littlest_directory_too_big = biggest_directory_size
+
+    for directory_size in directories_sizes:
+
+        # We take into account the directory size only if it is under the given threshold
+        if directory_size <= LITTLE_DIR_THRESHOLD:
+            little_directories_total_size += directory_size
+
+        # We take into account the directory size only if it is under the given threshold
+        # and if it is the littlest directory that is too big
+        if (
+            size_to_free > 0
+            and directory_size >= size_to_free
+            and directory_size < littlest_directory_too_big
+        ):
+            littlest_directory_too_big = directory_size
 
     print(little_directories_total_size)
-    print("TODO Part 2")
+    print(littlest_directory_too_big)
