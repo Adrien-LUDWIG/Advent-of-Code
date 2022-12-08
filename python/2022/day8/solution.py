@@ -20,24 +20,6 @@ def is_visible_2D(array, i, j):
     return is_visible_1D(line, j) or is_visible_1D(column, i)
 
 
-# Count the number of trees visible from the border
-def count_visible(array):
-    height = len(array)
-    width = len(array[0])
-
-    # Count the trees constituting the border which are always visible
-    # Subtract 4 because we don't want to count the corners twice
-    visible_count = height * 2 + width * 2 - 4
-
-    # Loop on the inner trees and count the visible ones
-    for i in range(1, height - 1):
-        for j in range(1, width - 1):
-            # If the tree is visible, increment the counter
-            visible_count += int(is_visible_2D(array, i, j))
-
-    return visible_count
-
-
 # Count the number of trees visible from this tree in a given direction
 def scenic_score_direction(list, i, step):
     score = step
@@ -63,21 +45,6 @@ def scenic_score_tree(array, i, j):
     return left * right * up * down
 
 
-# Get the highest scenic score of all the trees
-def get_highest_scenic_score(array):
-    height = len(array)
-    width = len(array[0])
-
-    max_scenic_score = 0
-
-    # Loop on the inner trees and get the highest scenic score
-    for i in range(1, height - 1):
-        for j in range(1, width - 1):
-            max_scenic_score = max(max_scenic_score, scenic_score_tree(array, i, j))
-
-    return max_scenic_score
-
-
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("Usage: python solution.py <input file>")
@@ -88,7 +55,30 @@ if __name__ == "__main__":
         input = [line.strip() for line in f.readlines()]
 
     # Split lines into characters and cast characters to int
-    input = [[int(char) for char in line] for line in input]
+    array = [[int(char) for char in line] for line in input]
 
-    print(count_visible(input))
-    print(get_highest_scenic_score(input))
+    height = len(array)
+    width = len(array[0])
+
+    # Part 1: Count the number of trees visible from the border
+
+    # Count the trees constituting the border which are always visible
+    # Subtract 4 because we don't want to count the corners twice
+    visible_count = height * 2 + width * 2 - 4
+
+    # Part 2: Get the highest scenic score of all the trees
+
+    # We can ignore the border trees because they have a scenic score of 0
+    max_scenic_score = 0
+
+    # Loop on the inner trees, count the visible ones and get the highest scenic score
+    for i in range(1, height - 1):
+        for j in range(1, width - 1):
+            # If the tree is visible, increment the counter
+            visible_count += int(is_visible_2D(array, i, j))
+
+            # Compute the scenic score of the tree and update the max if needed
+            max_scenic_score = max(max_scenic_score, scenic_score_tree(array, i, j))
+
+    print(visible_count)
+    print(max_scenic_score)
