@@ -26,10 +26,10 @@ def my_round(number):
 
 
 # Check if the head is too far from the tail and move the tail if needed
-def update_tail_position(head_position, tail_posistion):
+def update_tail_position(head_position, tail_position):
     # Get the direction from the tail to the head
     direction = (
-        head_position[0] - tail_posistion[0],
+        head_position[0] - tail_position[0],
         head_position[1] - tail_position[1],
     )
 
@@ -44,12 +44,12 @@ def update_tail_position(head_position, tail_posistion):
         direction = (my_round(direction[0]), my_round(direction[1]))
 
         # Move the tail
-        tail_posistion = (
-            tail_posistion[0] + direction[0],
-            tail_posistion[1] + direction[1],
+        tail_position = (
+            tail_position[0] + direction[0],
+            tail_position[1] + direction[1],
         )
 
-    return tail_posistion
+    return tail_position
 
 
 if __name__ == "__main__":
