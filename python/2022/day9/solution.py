@@ -1,5 +1,8 @@
 import sys
 
+# Length of the snake's body, the snake's head is included
+BODY_LENGTH = 10
+
 # Directions as letter to tuple
 direction_to_tuple = {
     "U": (0, 1),
@@ -25,8 +28,9 @@ def my_round(number):
         return int(number) + 1
 
 
+# Update the position of a body part. The frist part is called head and the following part is called tail.
 # Check if the head is too far from the tail and move the tail if needed
-def update_tail_position(head_position, tail_position):
+def update_body_part_position(head_position, tail_position):
     # Get the direction from the tail to the head
     direction = (
         head_position[0] - tail_position[0],
@@ -61,10 +65,13 @@ if __name__ == "__main__":
     with open(sys.argv[1]) as f:
         input = [line.strip() for line in f.readlines()]
 
-    head_position = (0, 0)
-    tail_position = (0, 0)
+    body_parts_positions = [(0, 0)] * BODY_LENGTH
 
-    visited_positions = set()
+    # Part 1: Tail is in fact the neck of the snake
+    neck_visited_positions = set()
+
+    # Part 2: Tail is at the end of the body
+    tail_visited_positions = set()
 
     for line in input:
         # Get the direction and the number of steps
@@ -78,15 +85,19 @@ if __name__ == "__main__":
 
         # Move the head
         for step in range(nb_of_steps):
-            head_position = (
-                head_position[0] + direction[0],
-                head_position[1] + direction[1],
+
+            # Move the head
+            body_parts_positions[0] = (
+                body_parts_positions[0][0] + direction[0],
+                body_parts_positions[0][1] + direction[1],
             )
 
-            # Move the tail if needed
-            tail_position = update_tail_position(head_position, tail_position)
+            # Move the rest of the body
+            for i in range(1, BODY_LENGTH):
+                body_parts_positions[i] = update_body_part_position(body_parts_positions[i - 1], body_parts_positions[i])
 
-            visited_positions.add(tail_position)
+            neck_visited_positions.add(body_parts_positions[1])
+            tail_visited_positions.add(body_parts_positions[-1])
 
-    print(len(visited_positions))
-    print("TODO part 2")
+    print(len(neck_visited_positions))
+    print(len(tail_visited_positions))
