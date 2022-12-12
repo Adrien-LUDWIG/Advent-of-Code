@@ -17,7 +17,10 @@ if __name__ == "__main__":
         input = [line.strip() for line in f.readlines()]
 
     # Part 1: Sum of the priorities of the items badly packed
-    priorities_sum = 0
+    priorities_sum_1 = 0
+
+    # Part 2: Sum of the priorities of the badges
+    priorities_sum_2 = 0
 
     for rucksack in input:
         # Split the rucksack in two compartments
@@ -30,8 +33,20 @@ if __name__ == "__main__":
         item_badly_packed = list(item_badly_packed)[0]
 
         # Add the priority of the item badly packed to the sum
-        priorities_sum += item_to_priority(item_badly_packed)
+        priorities_sum_1 += item_to_priority(item_badly_packed)
+
+    for i in range(0, len(input), 3):
+        rucksack1 = set(input[i])
+        rucksack2 = set(input[i + 1])
+        rucksack3 = set(input[i + 2])
+
+        # Get the badge
+        badge = rucksack1.intersection(rucksack2, rucksack3)
+        badge = list(badge)[0]
 
 
-    print(priorities_sum)
-    print("TODO part 2")
+        # Add the priority of the badge to the sum
+        priorities_sum_2 += item_to_priority(badge)
+
+    print(priorities_sum_1)
+    print(priorities_sum_2)
