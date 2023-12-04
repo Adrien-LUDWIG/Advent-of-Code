@@ -1,36 +1,71 @@
 import sys
+from collections import defaultdict
+from math import prod
 
 
-def is_symbol(input, line_i, char_i):
-    # Check line index before getting the char and checking it
-    if not (0 <= line_i and line_i < len(input)):
-        return False
-
-    char = input[line_i][char_i]
-    return char != "." and not char.isdigit()  # Check char value
+def is_number_finished(input, line_i, char_i):
+    # The current char is the last of the line or the next char is not a digit
+    return char_i + 1 == len(input[line_i]) or not input[line_i][char_i + 1].isdigit()
 
 
-def check_symbol_up_down(input, line_i, char_i):
-    # Up and down
-    return is_symbol(input, line_i - 1, char_i) or is_symbol(input, line_i + 1, char_i)
+def get_numbers(input):
+    """Parse numbers, with there starting coordinates, from input."""
+    numbers = []
+    number = 0
+
+    for line_i, line in enumerate(input):
+        for char_i, char in enumerate(line):
+            # If we have a digit, form the current number
+            if char.isdigit():
+                # Add the current digit to the part number
+                number = number * 10 + int(char)
+
+                if is_number_finished(input, line_i, char_i):
+                    numbers.append((number, line_i, char_i - len(str(number)) + 1))
+                    number = 0
+
+    return numbers
 
 
-def check_symbol_side(input, line_i, char_i):
-    return is_symbol(input, line_i, char_i) or check_symbol_up_down(
-        input, line_i, char_i
-    )
+def find_symbol(input, line_i, char_i, length):
+    """
+    Find the symbol around the number starting at (`line_i`, `char_i`) of size `length`.
+    Return the symbol and its coordinates if there is any, else None.
+    """
+    for line_j in range(max(0, line_i - 1), min(len(input), line_i + 2)):
+        for char_j in range(
+            max(0, char_i - 1), min(len(input[line_i]) - 1, char_i + length + 1)
+        ):
+            char = input[line_j][char_j]
+
+            if char.isdigit():
+                continue
+            elif char != ".":
+                return char, line_j, char_j
+
+    return None
 
 
-def update_sum(part_sum, part, has_symbol):
-    # Add up to total if it's a part number (i.e. a symbol is adjacent)
-    if has_symbol:
-        part_sum += part
+def get_parts_and_gears(input, numbers):
+    """
+    Get parts and gears from a list of numbers with there starting coordinates.
+    Parts are numbers that touches a symbol.
+    Gears are the `*` symbols.
+    """
+    parts = []
+    gears = defaultdict(list)
 
-    # Reset current variables
-    part = 0
-    has_symbol = False
+    for number, line_i, char_i in numbers:
+        result = find_symbol(input, line_i, char_i, len(str(number)))
 
-    return part_sum, part, has_symbol
+        if result:
+            parts.append(number)
+
+            symbol, line_j, char_j = result
+            if symbol == "*":
+                gears[(line_j, char_j)].append(number)
+
+    return parts, gears
 
 
 if __name__ == "__main__":
@@ -44,33 +79,14 @@ if __name__ == "__main__":
     with open(sys.argv[1]) as f:
         input = [line.strip() for line in f.readlines()]
 
-    part_sum = 0
-
-    part = 0
-    has_symbol = False
-
-    for line_i, line in enumerate(input):
-        for char_i, char in enumerate(line):
-            # If we have a digit, form the current number
-            if char.isdigit():
-                # For the first_digit, check if there is a symbol on its left
-                if part == 0 and char_i > 0:
-                    has_symbol |= check_symbol_side(input, line_i, char_i - 1)
-
-                # Add the current digit to the part number
-                part = part * 10 + int(char)
-                has_symbol |= check_symbol_up_down(input, line_i, char_i)
-
-            # If we are right after a number, check it has a symbol and update
-            # the sum
-            elif part != 0:
-                # No need to increment char_i because we already are on the
-                # next char
-                has_symbol |= check_symbol_side(input, line_i, char_i)
-
-                part_sum, part, has_symbol = update_sum(part_sum, part, has_symbol)
-        part_sum, part, has_symbol = update_sum(part_sum, part, has_symbol)
-    part_sum, part, has_symbol = update_sum(part_sum, part, has_symbol)
+    gears = defaultdict(list)
+    numbers = get_numbers(input)
+    parts, gears = get_parts_and_gears(input, numbers)
 
     # Part 1
-    print(part_sum)
+    print(sum(parts))
+
+    # Part 2
+    # Keep gears touching 2 parts
+    gears_parts = filter(lambda parts: len(parts) == 2, gears.values())
+    print(sum(map(prod, gears_parts)))
