@@ -1,3 +1,4 @@
+import math
 import sys
 import re
 
@@ -22,15 +23,20 @@ if __name__ == "__main__":
             src, dst0, dst1 = re.findall("\w+", line.strip())
             network[src] = (dst0, dst1)
 
-    count = 0
+    counts = []
     index = 0
-    node = "AAA"
+    nodes = [node for node in network if node[-1] == "A"]
 
-    while node != "ZZZ":
-        count += 1
+    for node in nodes:
+        count = 0
 
-        node = network[node][instructions[index]]
+        while not node[-1] == "Z":
+            count += 1
 
-        index = (index + 1) % len(instructions)
+            node = network[node][instructions[index]]
 
-    print(count)
+            index = (index + 1) % len(instructions)
+
+        counts.append(count)
+
+    print(math.lcm(*counts))
