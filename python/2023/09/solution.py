@@ -11,12 +11,12 @@ def find_next(seq):
     while any(seq):
         stack.append([rhs - lhs for lhs, rhs in zip(seq[:-1], seq[1:])])
         seq = stack[-1]
-     
+
     prediction = 0
     
     while stack:
         seq = stack.pop()
-        prediction += seq[-1]
+        prediction = seq[0] - prediction
         
     return prediction
         
