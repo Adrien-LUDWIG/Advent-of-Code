@@ -5,8 +5,8 @@ Distance:   298   1185   1066   1181"""
 
 times, distances = input.split("\n")
 
-times = map(int, times.split()[1:])
-distances = map(int, distances.split()[1:])
+times = [int("".join(times.split()[1:]))]
+distances = [int("".join(distances.split()[1:]))]
 
 possibilities_product = 1
 
