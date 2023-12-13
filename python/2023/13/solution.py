@@ -74,9 +74,7 @@ def summarize(maps, find_symmetry_function):
     summary = 0
 
     for map in maps:
-        hor_sym_index = find_symmetry_function(map)
-
-        if hor_sym_index:
+        if hor_sym_index := find_symmetry_function(map):
             summary += hor_sym_index * HORIZONTAL_COEF
         else:
             # If there is no horizontal symmetry, transpose the matrix to look
@@ -97,7 +95,7 @@ if __name__ == "__main__":
     # Read input file and split into stripped lines
     with open(sys.argv[1]) as f:
         maps = f.read().split("\n\n")
-        maps = [[line.strip() for line in map.split("\n") if line] for map in maps]
+        maps = [[line.strip() for line in map.splitlines() if line] for map in maps]
 
     # Part 1
     print(summarize(maps, find_symmetry))
