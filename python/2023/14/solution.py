@@ -1,15 +1,16 @@
 import sys
 
 
-def tilt_north(reflector):
+def tilt_north_south(reflector, north=True):
     """Given a reflector state, return the new state after tilting it north."""
 
     height, width = len(reflector), len(reflector[0])
+    step = 1 if north else -1
 
     for j in range(width):
-        rock_destination = 0
+        rock_destination = 0 if north else height - 1
 
-        for i in range(height):
+        for i in range(height) if north else range(height - 1, -1, -1):
             if reflector[i][j] == "O":
                 # Swap rock with its destination
                 reflector[i][j], reflector[rock_destination][j] = (
@@ -17,87 +18,27 @@ def tilt_north(reflector):
                     reflector[i][j],
                 )
 
-                rock_destination += 1
+                rock_destination += step
             elif reflector[i][j] == "#":
-                rock_destination = i + 1
+                rock_destination = i + step
 
     return reflector
 
 
-def tilt_south(reflector):
-    """Given a reflector state, return the new state after tilting it south."""
-
-    height, width = len(reflector), len(reflector[0])
-
-    for j in range(width):
-        rock_destination = height - 1
-
-        for i in range(height - 1, -1, -1):
-            if reflector[i][j] == "O":
-                # Swap rock with its destination
-                reflector[i][j], reflector[rock_destination][j] = (
-                    reflector[rock_destination][j],
-                    reflector[i][j],
-                )
-
-                rock_destination -= 1
-            elif reflector[i][j] == "#":
-                rock_destination = i - 1
-
-    return reflector
+def transpose(matrix):
+    return list(list(row) for row in zip(*matrix))
 
 
-def tilt_west(reflector):
+def tilt_west_east(reflector, west=True):
     """Given a reflector state, return the new state after tilting it west."""
-
-    height, width = len(reflector), len(reflector[0])
-
-    for i in range(height):
-        rock_destination = 0
-
-        for j in range(width):
-            if reflector[i][j] == "O":
-                # Swap rock with its destination
-                reflector[i][j], reflector[i][rock_destination] = (
-                    reflector[i][rock_destination],
-                    reflector[i][j],
-                )
-
-                rock_destination += 1
-            elif reflector[i][j] == "#":
-                rock_destination = j + 1
-
-    return reflector
-
-
-def tilt_east(reflector):
-    """Given a reflector state, return the new state after tilting it east."""
-
-    height, width = len(reflector), len(reflector[0])
-
-    for i in range(height):
-        rock_destination = width - 1
-
-        for j in range(width - 1, -1, -1):
-            if reflector[i][j] == "O":
-                # Swap rock with its destination
-                reflector[i][j], reflector[i][rock_destination] = (
-                    reflector[i][rock_destination],
-                    reflector[i][j],
-                )
-
-                rock_destination -= 1
-            elif reflector[i][j] == "#":
-                rock_destination = j - 1
-
-    return reflector
+    return transpose(tilt_north_south(transpose(reflector), north=west))
 
 
 def spin_cycle(reflector):
-    reflector = tilt_north(reflector)
-    reflector = tilt_west(reflector)
-    reflector = tilt_south(reflector)
-    reflector = tilt_east(reflector)
+    reflector = tilt_north_south(reflector, north=True)
+    reflector = tilt_west_east(reflector, west=True)
+    reflector = tilt_north_south(reflector, north=False)
+    reflector = tilt_west_east(reflector, west=False)
 
     return reflector
 
@@ -109,22 +50,18 @@ def spin_n_times(reflector, n):
         return tuple(tuple(row) for row in matrix)
 
     seen = {}
-    count = 0
 
-    while count < n and to_tuple(reflector) not in seen:
-        seen[to_tuple(reflector)] = count
-        count += 1
-
+    for i in range(n):
+        seen[to_tuple(reflector)] = i
         reflector = spin_cycle(reflector)
 
-    if count == n:
-        return reflector
+        if to_tuple(reflector) in seen:
+            cycle_start = seen[to_tuple(reflector)]
+            cycle_length = i + 1 - cycle_start
 
-    cycle_start = seen[to_tuple(reflector)]
-    cycle_length = count - cycle_start
-
-    for _ in range((n - cycle_start) % cycle_length):
-        reflector = spin_cycle(reflector)
+            for _ in range((n - cycle_start) % cycle_length):
+                reflector = spin_cycle(reflector)
+            break
 
     return reflector
 
@@ -132,16 +69,8 @@ def spin_n_times(reflector, n):
 def compute_load(reflector):
     """Compute the load on the reflector support beams given the reflector state."""
 
-    height, width = len(reflector), len(reflector[0])
-
-    total_load = 0
-
-    for j in range(width):
-        for i in range(height):
-            if reflector[i][j] == "O":
-                total_load += height - i
-
-    return total_load
+    h, w = len(reflector), len(reflector[0])  # height, width
+    return sum(h - i for j in range(w) for i in range(h) if reflector[i][j] == "O")
 
 
 if __name__ == "__main__":
@@ -156,7 +85,7 @@ if __name__ == "__main__":
         reflector = list(map(list, map(str.strip, f.readlines())))
 
     # Part 1
-    print(compute_load(tilt_north(reflector)))
+    print(compute_load(tilt_north_south(reflector)))
 
     # Part 2
     print(compute_load(spin_n_times(reflector, 1_000_000_000)))
