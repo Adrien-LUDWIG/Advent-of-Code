@@ -12,6 +12,32 @@ def hash_function(step):
     return result
 
 
+def hashmap(steps):
+    boxes = [{} for _ in range(256)]
+
+    for step in steps:
+        if step[-1] == "-":
+            label = step[:-1]
+            boxes[hash_function(label)].pop(label, None)
+        else:
+            label = step[:-2]
+            focal_length = int(step[-1])
+            boxes[hash_function(label)][label] = focal_length
+
+    return boxes
+
+
+def focusing_power(boxes):
+    total_focusing_power = 0
+
+    for box_index, box in enumerate(boxes, start=1):
+        for label_index, lens in enumerate(box.items(), start=1):
+            _, focus_length = lens
+            total_focusing_power += box_index * label_index * focus_length
+
+    return total_focusing_power
+
+
 if __name__ == "__main__":
     # Check args and indicate usage if necessary
     if len(sys.argv) != 2:
@@ -24,3 +50,5 @@ if __name__ == "__main__":
         steps = f.read().strip().split(",")
 
     print(sum(map(hash_function, steps)))
+
+    print(focusing_power(hashmap(steps)))
