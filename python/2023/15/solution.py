@@ -2,6 +2,7 @@ import sys
 
 
 def hash_function(step):
+    """Given a string returns a number between 0 and 255."""
     result = 0
 
     for char in step:
@@ -13,13 +14,18 @@ def hash_function(step):
 
 
 def hashmap(steps):
+    """Holiday ASCII String Helper Manual Arrangement Procedure
+
+    Given some steps encoded as "<label>(=|-)[<focus_length>]", organize the
+    lens in the 256 available boxes.
+    """
     boxes = [{} for _ in range(256)]
 
     for step in steps:
         if step[-1] == "-":
             label = step[:-1]
             boxes[hash_function(label)].pop(label, None)
-        else:
+        else:  # step[-2] == "=" and step[-1] is a digit
             label = step[:-2]
             focal_length = int(step[-1])
             boxes[hash_function(label)][label] = focal_length
@@ -28,6 +34,10 @@ def hashmap(steps):
 
 
 def focusing_power(boxes):
+    """
+    Given a list of boxes containing ordered lenses, return the focusing power
+    of sequences of boxes.
+    """
     total_focusing_power = 0
 
     for box_index, box in enumerate(boxes, start=1):
@@ -49,6 +59,8 @@ if __name__ == "__main__":
     with open(sys.argv[1]) as f:
         steps = f.read().strip().split(",")
 
+    # Part 1
     print(sum(map(hash_function, steps)))
 
+    # Part 2
     print(focusing_power(hashmap(steps)))
