@@ -3,6 +3,26 @@ import sys
 from collections import defaultdict, deque
 
 
+class Vec(tuple):
+    """Tuples you can add, swap and negate."""
+
+    def __add__(self, other):
+        return Vec((self[0] + other[0], self[1] + other[1]))
+
+    def swap(self):
+        return Vec(reversed(self))
+
+    def __neg__(self):
+        return Vec(-x for x in self)
+
+
+# Directions
+UP = Vec((-1, 0))
+DOWN = Vec((1, 0))
+LEFT = Vec((0, -1))
+RIGHT = Vec((0, 1))
+
+
 def is_inside(position, height, width):
     """Check if a given 2D position  is in a grid reprsented by its height and width."""
     return 0 <= position[0] < height and 0 <= position[1] < width
@@ -23,8 +43,6 @@ def count_seen_tiles(layout, start_postion, start_direction):
     # Simulate rays
     while rays:
         position, direction = rays.popleft()
-        i, j = position
-        delta_i, delta_j = direction
 
         if not is_inside(position, height, width) or direction in seen_tiles[position]:
             continue
@@ -32,21 +50,21 @@ def count_seen_tiles(layout, start_postion, start_direction):
         seen_tiles[position].add(direction)
 
         # Figure out the new direction (and thus position)
-        match layout[i][j]:
-            case "-" if delta_i != 0:
-                rays.append(((i, j - 1), (0, -1)))
-                rays.append(((i, j + 1), (0, 1)))
-            case "|" if delta_j != 0:
-                rays.append(((i - 1, j), (-1, 0)))
-                rays.append(((i + 1, j), (1, 0)))
+        match layout[position[0]][position[1]]:
+            case "-" if direction[0] != 0:
+                rays.append((position + LEFT, LEFT))
+                rays.append((position + RIGHT, RIGHT))
+            case "|" if direction[1] != 0:
+                rays.append((position + UP, UP))
+                rays.append((position + DOWN, DOWN))
             case "/":
-                delta_i, delta_j = direction = -delta_j, -delta_i
-                rays.append(((i + delta_i, j + delta_j), direction))
+                direction = -direction.swap()
+                rays.append((position + direction, direction))
             case "\\":
-                delta_i, delta_j = direction = delta_j, delta_i
-                rays.append(((i + delta_i, j + delta_j), direction))
+                direction = direction.swap()
+                rays.append((position + direction, direction))
             case _:
-                rays.append(((i + delta_i, j + delta_j), direction))
+                rays.append((position + direction, direction))
 
     return len(seen_tiles)
 
@@ -63,7 +81,7 @@ if __name__ == "__main__":
         layout = [line.strip() for line in f.readlines()]
 
     # Part 1
-    print(count_seen_tiles(layout, (0, 0), (0, 1)))
+    print(count_seen_tiles(layout, Vec((0, 0)), RIGHT))
 
     # Part 2
     height, width = len(layout), len(layout[0])
@@ -72,12 +90,12 @@ if __name__ == "__main__":
     # Test all starting positions
     # Up and down
     for j in range(width):
-        max_count = max(max_count, count_seen_tiles(layout, (0, j), (1, 0)))
-        max_count = max(max_count, count_seen_tiles(layout, (height - 1, j), (-1, 0)))
+        max_count = max(max_count, count_seen_tiles(layout, Vec((height - 1, j)), UP))
+        max_count = max(max_count, count_seen_tiles(layout, Vec((0, j)), DOWN))
 
     # Left and right
     for i in range(height):
-        max_count = max(max_count, count_seen_tiles(layout, (i, 0), (0, 1)))
-        max_count = max(max_count, count_seen_tiles(layout, (i, width - 1), (0, -1)))
+        max_count = max(max_count, count_seen_tiles(layout, Vec((i, width - 1)), LEFT))
+        max_count = max(max_count, count_seen_tiles(layout, Vec((i, 0)), RIGHT))
 
     print(max_count)
