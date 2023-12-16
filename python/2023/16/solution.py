@@ -3,10 +3,11 @@ import sys
 from collections import defaultdict, deque
 
 
-def count_energized_tiles(layout):
+def count_energized_tiles(layout, start_postion, start_direction):
     energized_tiles = defaultdict(set)
     rays = deque()
-    rays.append(((0, 0), (0, 1)))  # position, direction
+
+    rays.append((start_postion, start_direction))  # position, direction
 
     while rays:
         position, direction = rays.popleft()
@@ -71,4 +72,29 @@ if __name__ == "__main__":
     with open(sys.argv[1]) as f:
         layout = [line.strip() for line in f.readlines()]
 
-    print(count_energized_tiles(layout))
+    print(count_energized_tiles(layout, (0, 0), (0, 1)))
+
+    height, width = len(layout), len(layout[0])
+    max_energized = 0
+
+    for j in range(width):
+        max_energized = max(
+            max_energized, count_energized_tiles(layout, (0, j), (1, 0))
+        )
+
+    for j in range(width):
+        max_energized = max(
+            max_energized, count_energized_tiles(layout, (height - 1, j), (-1, 0))
+        )
+
+    for i in range(height):
+        max_energized = max(
+            max_energized, count_energized_tiles(layout, (i, 0), (0, 1))
+        )
+
+    for i in range(height):
+        max_energized = max(
+            max_energized, count_energized_tiles(layout, (i, width - 1), (0, -1))
+        )
+
+    print(max_energized)
