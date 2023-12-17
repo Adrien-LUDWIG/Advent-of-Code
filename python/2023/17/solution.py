@@ -3,53 +3,52 @@ from heapq import heappush, heappop
 
 
 def dijkstra(map, src, dst, min_consecutive, max_consecutive):
+    """
+    Finds the shortest path from src to dst making sure direction changes
+    only after at least min_consecutive moves and at most max_consectutive
+    moves.
+
+    Returns the cost of the path.
+    """
     seen = set()
 
     # Dist, node id, node, direction, consecutive direction count
-    heap = [(0, id(src), src, complex(1, 0), 0)]
+    heap = [(0, id(src), src, complex(0, 1)), (0, id(src), src, complex(1, 0))]
 
     while heap:
-        distance, _, node, direction, count = heappop(heap)
+        distance, _, node, direction = heappop(heap)
 
-        if (node, direction, count) in seen:
+        if (node, direction) in seen:
             continue
 
-        if node == dst and count >= min_consecutive:
+        if node == dst:
             return distance
 
-        seen.add((node, direction, count))
+        seen.add((node, direction))
 
-        for delta in (direction, direction * 1j, direction * -1j):
+        # Go through neighbors
+        for delta in (direction * 1j, direction * -1j):
             neighbor = node
             neighbor_distance = distance
-            neighbor_count = count if delta == direction else 0
+            neighbor_count = 0
 
-            while neighbor + delta in map and neighbor_count < (min_consecutive - 1):
+            # Move
+            while neighbor_count < max_consecutive and neighbor + delta in map:
                 neighbor += delta
                 neighbor_distance += map[neighbor]
                 neighbor_count += 1
 
-            neighbor += delta
-
-            if neighbor not in map:
-                continue
-
-            neighbor_distance += map[neighbor]
-            neighbor_count += 1
-
-            if neighbor_count > max_consecutive:
-                continue
-
-            heappush(
-                heap,
-                (
-                    neighbor_distance,
-                    id(neighbor),
-                    neighbor,
-                    delta,
-                    neighbor_count,
-                ),
-            )
+                if neighbor_count >= min_consecutive:
+                    heappush(
+                        heap,
+                        (
+                            neighbor_distance,
+                            id(neighbor),  # Hack to avoid comparing complex numbers
+                            neighbor,
+                            delta,
+                            neighbor_count,
+                        ),
+                    )
 
     raise RuntimeError("Path to destination not found.")
 
