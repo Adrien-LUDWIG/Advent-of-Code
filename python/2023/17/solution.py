@@ -46,7 +46,6 @@ def dijkstra(map, src, dst, min_consecutive, max_consecutive):
                             id(neighbor),  # Hack to avoid comparing complex numbers
                             neighbor,
                             delta,
-                            neighbor_count,
                         ),
                     )
 
