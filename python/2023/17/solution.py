@@ -1,4 +1,5 @@
-import sys
+from aocd import data
+from aocd.models import Puzzle
 from heapq import heappush, heappop
 
 
@@ -52,24 +53,40 @@ def dijkstra(map, src, dst, min_consecutive, max_consecutive):
     raise RuntimeError("Path to destination not found.")
 
 
-if __name__ == "__main__":
-    # Check args and indicate usage if necessary
-    if len(sys.argv) != 2:
-        print("Usage: python solution.py <input file>")
-
-        sys.exit(1)
-
-    # Read input file
+def parse_data(data):
     map = {}
     src, dst = complex(0, 0), None
-    with open(sys.argv[1]) as f:
-        for x, line in enumerate(f.readlines()):
-            for y, cost in enumerate(line.strip()):
-                map[complex(x, y)] = int(cost)
-                dst = complex(x, y)
+    for x, line in enumerate(data.splitlines()):
+        for y, cost in enumerate(line.strip()):
+            map[complex(x, y)] = int(cost)
+            dst = complex(x, y)
 
-    # Part 1
-    print(dijkstra(map, src, dst, 1, 3))
+    return map, src, dst
 
-    # Part 2
-    print(dijkstra(map, src, dst, 4, 10))
+
+def part1(map, src, dst):
+    return dijkstra(map, src, dst, 1, 3)
+
+
+def part2(map, src, dst):
+    return dijkstra(map, src, dst, 4, 10)
+
+
+def solve(data):
+    map, src, dst = parse_data(data)
+    return part1(map, src, dst), part2(map, src, dst)
+
+
+if __name__ == "__main__":
+    puzzle = Puzzle(year=2023, day=17)
+
+    for example in puzzle.examples:
+        answer_a, answer_b = solve(example.input_data)
+
+        if example.answer_a is not None:
+            assert answer_a == int(example.answer_a)
+
+        if example.answer_b is not None:
+            assert answer_b == int(example.answer_b)
+
+    print(solve(data))
