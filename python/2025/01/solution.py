@@ -15,13 +15,8 @@ def parse_data(puzzle_input):
     return rotations
 
 
-def create_grid(blocks):
-    grid = []
-
-
 def part1(rotations):
     """Solve part 1."""
-    print(rotations)
     dial = 50
     zeroCount = 0
 
@@ -34,14 +29,28 @@ def part1(rotations):
     return zeroCount
 
 
-def part2(data):
+def part2(rotations):
     """Solve part 2."""
+    dial = 50
+    zeroCount = 0
+
+    for sign, offset in rotations:
+        previousDial = dial
+        zeroCount += offset // 100
+        dial = dial + sign * (offset % 100)
+
+        if previousDial != 0 and dial <= 0 or 100 <= dial:
+            zeroCount += 1
+
+        dial %= 100
+
+    return zeroCount
 
 
 def solve(puzzle_input):
     """Solve the puzzle for the given input."""
-    blocks = parse_data(puzzle_input)
-    return part1(blocks), part2(data)
+    rotations = parse_data(puzzle_input)
+    return part1(rotations), part2(rotations)
 
 
 if __name__ == "__main__":
