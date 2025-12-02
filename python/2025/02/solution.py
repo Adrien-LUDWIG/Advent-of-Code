@@ -1,5 +1,6 @@
 """AoC 01, 2025: Secret Entrance."""
 
+import re
 import sys
 
 from aocd import data, submit
@@ -27,15 +28,34 @@ def part1(ranges):
     return fakeIdsSum
 
 
-def part2(rotations):
+def part2(ranges):
     """Solve part 2."""
-    pass
+
+    def isFakeId():
+        for i in range(1, mid + 1):
+            group = idString[:i]
+            pattern = f"^({group}){{2,{digitsCount // len(group)}}}$"
+            if re.match(pattern, idString):
+                return True
+        return False
+
+    fakeIdsSum = 0
+
+    for start, end in ranges:
+        for id in range(start, end + 1):
+            idString = str(id)
+            digitsCount = len(idString)
+            mid = digitsCount // 2
+            if isFakeId():
+                fakeIdsSum += id
+
+    return fakeIdsSum
 
 
 def solve(puzzle_input):
     """Solve the puzzle for the given input."""
-    rotations = parse_data(puzzle_input)
-    return part1(rotations), part2(rotations)
+    ranges = parse_data(puzzle_input)
+    return part1(ranges), part2(ranges)
 
 
 if __name__ == "__main__":
