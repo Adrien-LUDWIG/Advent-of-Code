@@ -16,28 +16,47 @@ def maxWithIndex(iterable):
     return (max, maxIndex)
 
 
+def biggestSubNumber(iterable, digitsCount):
+    if len(iterable) == 0:
+        return ""
+
+    max, maxIndex = maxWithIndex(iterable)
+    max = str(max)
+    digitsCount -= 1
+    rhs = ""
+
+    if digitsCount == 0:
+        return max
+    if (maxIndex + 1) < len(iterable):
+        rhs = biggestSubNumber(iterable[maxIndex + 1 :], digitsCount)
+
+        if len(rhs) == digitsCount:
+            return max + rhs
+
+    lhs = biggestSubNumber(iterable[:maxIndex], digitsCount - len(rhs))
+    return lhs + max + rhs
+
+
 def part1(banks):
     """Solve part 1."""
     totalJoltage = 0
 
     for bank in banks:
-        maxJoltage, maxJoltageIndex = maxWithIndex(map(int, bank))
-
-        if (maxJoltageIndex + 1) < len(bank):
-            secondMaxJoltage = max(map(int, bank[maxJoltageIndex + 1 :]))
-            bankJoltage = maxJoltage * 10 + secondMaxJoltage
-        else:
-            secondMaxJoltage = max(map(int, bank[:maxJoltageIndex]))
-            bankJoltage = secondMaxJoltage * 10 + maxJoltage
-
+        bankJoltage = biggestSubNumber(list(map(int, bank)), 2)
+        print(bankJoltage)
         totalJoltage += int(bankJoltage)
-
     return totalJoltage
 
 
 def part2(banks):
     """Solve part 2."""
-    pass
+    totalJoltage = 0
+
+    for bank in banks:
+        bankJoltage = biggestSubNumber(list(map(int, bank)), 12)
+        print(bankJoltage)
+        totalJoltage += int(bankJoltage)
+    return totalJoltage
 
 
 def solve(puzzle_input):
