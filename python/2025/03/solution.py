@@ -4,65 +4,37 @@ from aocd import data, submit
 
 
 def maxWithIndex(iterable):
-    max = 0
-    maxIndex = 0
+    (max, index) = ("0", 0)
 
-    for index, element in enumerate(iterable):
-        element = int(element)
+    for i, element in enumerate(iterable):
         if element > max:
-            max = element
-            maxIndex = index
+            (max, index) = (element, i)
 
-    return (max, maxIndex)
+    return (max, index)
 
 
 def biggestSubNumber(iterable, digitsCount):
-    if len(iterable) == 0:
+    if len(iterable) == 0 or digitsCount <= 0:
         return ""
 
-    max, maxIndex = maxWithIndex(iterable)
-    max = str(max)
-    digitsCount -= 1
-    rhs = ""
+    maxDigit, maxIndex = maxWithIndex(iterable)
+    rhs = biggestSubNumber(iterable[maxIndex + 1 :], digitsCount - 1)
+    lhs = biggestSubNumber(iterable[:maxIndex], digitsCount - 1 - len(rhs))
 
-    if digitsCount == 0:
-        return max
-    if (maxIndex + 1) < len(iterable):
-        rhs = biggestSubNumber(iterable[maxIndex + 1 :], digitsCount)
-
-        if len(rhs) == digitsCount:
-            return max + rhs
-
-    lhs = biggestSubNumber(iterable[:maxIndex], digitsCount - len(rhs))
-    return lhs + max + rhs
-
-
-def part1(banks):
-    """Solve part 1."""
-    totalJoltage = 0
-
-    for bank in banks:
-        bankJoltage = biggestSubNumber(list(map(int, bank)), 2)
-        print(bankJoltage)
-        totalJoltage += int(bankJoltage)
-    return totalJoltage
-
-
-def part2(banks):
-    """Solve part 2."""
-    totalJoltage = 0
-
-    for bank in banks:
-        bankJoltage = biggestSubNumber(list(map(int, bank)), 12)
-        print(bankJoltage)
-        totalJoltage += int(bankJoltage)
-    return totalJoltage
+    return lhs + maxDigit + rhs
 
 
 def solve(puzzle_input):
     """Solve the puzzle for the given input."""
     banks = puzzle_input.splitlines()
-    return part1(banks), part2(banks)
+    totalJoltage1 = 0
+    totalJoltage2 = 0
+
+    for bank in banks:
+        totalJoltage1 += int(biggestSubNumber(bank, 2))
+        totalJoltage2 += int(biggestSubNumber(bank, 12))
+
+    return (totalJoltage1, totalJoltage2)
 
 
 if __name__ == "__main__":
