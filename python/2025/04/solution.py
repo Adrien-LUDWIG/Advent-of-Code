@@ -3,10 +3,10 @@ import sys
 from aocd import data, submit
 
 
-def part1(grid):
+def getAccessibleRolls(grid):
     height = len(grid)
     width = len(grid[0])
-    accessibleRollsCount = 0
+    accessibleRollsCoordinates = set()
 
     for row in range(height):
         for column in range(width):
@@ -28,17 +28,33 @@ def part1(grid):
                     adjacentRollsCount += isRoll
 
             isAccessible = adjacentRollsCount < 4
-            accessibleRollsCount += isAccessible
+            if isAccessible:
+                accessibleRollsCoordinates.add((row, column))
 
-    return accessibleRollsCount
+    return accessibleRollsCoordinates
+
+
+def part1(grid):
+    return len(getAccessibleRolls(grid))
 
 
 def part2(grid):
-    pass
+    totalAccessibleRollsCount = 0
+    accessibleRollsCoordinates = getAccessibleRolls(grid)
+
+    while len(accessibleRollsCoordinates) > 0:
+        totalAccessibleRollsCount += len(accessibleRollsCoordinates)
+
+        for row, column in accessibleRollsCoordinates:
+            grid[row][column] = "."
+
+        accessibleRollsCoordinates = getAccessibleRolls(grid)
+
+    return totalAccessibleRollsCount
 
 
 def solve(puzzle_input):
-    grid = puzzle_input.splitlines()
+    grid = list(map(list, puzzle_input.splitlines()))
 
     return part1(grid), part2(grid)
 
