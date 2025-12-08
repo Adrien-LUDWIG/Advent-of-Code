@@ -14,16 +14,8 @@ def parse_data(puzzle_input):
     return coordinates
 
 
-def part1(coordinates):
+def part1(distances):
     """Solve part 1."""
-    distances = []
-
-    for i in range(len(coordinates)):
-        for j in range(i + 1, len(coordinates)):
-            distance = math.dist(coordinates[i], coordinates[j])
-            bisect.insort(distances, (distance, i, j))
-
-    print("Sorted")
 
     circuits = []
     junctionsCircuits = {}
@@ -32,16 +24,6 @@ def part1(coordinates):
 
     while i < 1000:
         (_, junction1, junction2) = distances[i]
-        print(
-            (
-                junction1,
-                junction2,
-                # coordinates[junction1],
-                # coordinates[junction2],
-                # circuits,
-                # junctionsCircuits,
-            )
-        )
 
         circuit1 = junctionsCircuits.get(junction1, None)
         circuit2 = junctionsCircuits.get(junction2, None)
@@ -74,17 +56,59 @@ def part1(coordinates):
     return math.prod(circuitsSizes[:3])
 
 
-def part2(ranges):
-    """Solve part 2."""
+def part2(coordinates, distances):
+    circuits = []
+    junctionsCircuits = {}
+    skipped = 0
+    i = 0
+    maxCircuitLength = 0
 
-    pass
+    while maxCircuitLength < len(coordinates):
+        (_, junction1, junction2) = distances[i]
+
+        circuit1 = junctionsCircuits.get(junction1, None)
+        circuit2 = junctionsCircuits.get(junction2, None)
+
+        if circuit1 is None and circuit2 is None:
+            circuits.append(set((junction1, junction2)))
+            junctionsCircuits[junction1] = len(circuits) - 1
+            junctionsCircuits[junction2] = len(circuits) - 1
+        elif circuit1 is None:
+            junctionsCircuits[junction1] = circuit2
+            circuits[circuit2].add(junction1)
+        elif circuit2 is None:
+            junctionsCircuits[junction2] = circuit1
+            circuits[circuit1].add(junction2)
+        elif circuit1 != circuit2:
+            fusionedCircuit = circuits[circuit2]
+            circuits[circuit2] = set()
+
+            for junction in fusionedCircuit:
+                junctionsCircuits[junction] = circuit1
+                circuits[circuit1].add(junction)
+        else:
+            skipped += 1
+
+        i += 1
+        maxCircuitLength = max(maxCircuitLength, max(map(len, circuits)))
+
+    (_, junction1, junction2) = distances[i - 1]
+    return coordinates[junction1][0] * coordinates[junction2][0]
 
 
 def solve(puzzle_input):
     """Solve the puzzle for the given input."""
     coordinates = parse_data(puzzle_input)
     print("Parsed")
-    return part1(coordinates), part2(coordinates)
+    distances = []
+
+    for i in range(len(coordinates)):
+        for j in range(i + 1, len(coordinates)):
+            distance = math.dist(coordinates[i], coordinates[j])
+            bisect.insort(distances, (distance, i, j))
+
+    print("Sorted")
+    return part1(distances), part2(coordinates, distances)
 
 
 if __name__ == "__main__":
