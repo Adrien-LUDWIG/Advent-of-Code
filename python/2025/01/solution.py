@@ -1,12 +1,9 @@
-"""AoC 01, 2025: Secret Entrance."""
-
 import sys
 
-from aocd import data
+from aocd import data, submit
 
 
 def parse_data(puzzle_input):
-    """Parse input."""
     rotations = [
         (1 if line[0] == "R" else -1, int(line[1:]))
         for line in puzzle_input.splitlines()
@@ -16,7 +13,6 @@ def parse_data(puzzle_input):
 
 
 def part1(rotations):
-    """Solve part 1."""
     dial = 50
     zeroCount = 0
 
@@ -30,7 +26,6 @@ def part1(rotations):
 
 
 def part2(rotations):
-    """Solve part 2."""
     dial = 50
     zeroCount = 0
 
@@ -48,10 +43,15 @@ def part2(rotations):
 
 
 def solve(puzzle_input):
-    """Solve the puzzle for the given input."""
     rotations = parse_data(puzzle_input)
     return part1(rotations), part2(rotations)
 
 
 if __name__ == "__main__":
-    print(solve(data if len(sys.argv) != 2 else open(sys.argv[1], "r").read()))
+    hasArgs = len(sys.argv) > 1
+    answer = solve(data if not hasArgs else open(sys.argv[1], "r").read())
+
+    if not hasArgs:
+        submit(answer[0] if answer[1] is None else answer[1])
+
+    print(answer)
