@@ -1,5 +1,3 @@
-"""AoC 01, 2025: Secret Entrance."""
-
 import re
 import sys
 
@@ -7,14 +5,12 @@ from aocd import data, submit
 
 
 def parse_data(puzzle_input):
-    """Parse input."""
     ranges = [list(map(int, range.split("-"))) for range in puzzle_input.split(",")]
 
     return ranges
 
 
 def part1(ranges):
-    """Solve part 1."""
     fakeIdsSum = 0
 
     for start, end in ranges:
@@ -29,8 +25,6 @@ def part1(ranges):
 
 
 def part2(ranges):
-    """Solve part 2."""
-
     def isFakeId():
         for i in range(1, mid + 1):
             group = idString[:i]
@@ -53,7 +47,6 @@ def part2(ranges):
 
 
 def solve(puzzle_input):
-    """Solve the puzzle for the given input."""
     ranges = parse_data(puzzle_input)
     return part1(ranges), part2(ranges)
 
